@@ -1,0 +1,16 @@
+[
+  {
+    "url": "https://tuoitre.vn/",
+    "name": "TUOI TRE ONLINE",
+    "category": "Tin tức",
+    "lang": "vi",
+    "icon": "🌐"
+  },
+  {
+    "url": "https://news.tuoitre.vn/",
+    "name": "Tuoi tre news",
+    "category": "Tin tức",
+    "lang": "en",
+    "icon": "🌐"
+  }
+]

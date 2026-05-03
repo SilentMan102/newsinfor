@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Quản lý nguồn tin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <style>
+    /* ── Page-specific overrides ── */
+    .page-wrap { display: block; }
+
+    .mgr-wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .page-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: var(--white);
+    }
+    .page-header p { font-size: .82rem; color: var(--muted); margin-top: .25rem; }
+    .btn-back {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .82rem;
+      padding: .5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Stats row ── */
+    .mgr-stats {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex;
+      gap: .6rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-bar input {
+      flex: 1;
+      min-width: 180px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .83rem;
+      padding: .45rem .75rem;
+      outline: none;
+    }
+    .filter-bar input:focus { border-color: var(--gold); }
+    .filter-bar input::placeholder { color: var(--muted); }
+    .filter-bar select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .82rem;
+      padding: .45rem .6rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* ── ADD SOURCE FORM ── */
+    .add-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 2rem;
+    }
+    .add-box h3 { font-size: .88rem; font-weight: 600; color: var(--white); margin-bottom: 1rem; }
+    .add-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: .5rem;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+    .add-grid label { font-size: .7rem; color: var(--muted); display: block; margin-bottom: .25rem; }
+    .add-grid input, .add-grid select {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .82rem;
+      padding: .48rem .65rem;
+      outline: none;
+    }
+    .add-grid input:focus, .add-grid select:focus { border-color: var(--gold); }
+    .add-grid input::placeholder { color: var(--muted); }
+    .btn-add {
+      background: var(--green);
+      color: var(--dark);
+      border: none;
+      border-radius: 6px;
+      padding: .5rem 1.1rem;
+      font-size: .82rem;
+      font-weight: 600;
+      font-family: 'IBM Plex Sans', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+      height: 34px;
+    }
+    .btn-add:hover { opacity: .85; }
+    .btn-add:disabled { opacity: .5; cursor: not-allowed; }
+    #add-status { font-size: .75rem; margin-top: .6rem; min-height: 1.2em; }
+
+    /* ── Section title ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: .75rem;
+      margin-top: 1.5rem;
+    }
+    .section-header h3 { font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .section-header span { font-size: .72rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+    /* ── Source Table ── */
+    .source-table { display: flex; flex-direction: column; gap: .4rem; }
+
+    .source-row {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: 36px 1.8fr 1fr .8fr .7fr auto;
+      align-items: center;
+      gap: .6rem;
+      padding: .7rem 1rem;
+      transition: border-color .15s, opacity .15s;
+    }
+    .source-row:hover { border-color: var(--border); background: #1e242c; }
+    .source-row.disabled { opacity: .45; }
+    .source-row.preset-row { border-left: 3px solid rgba(232,168,56,.4); }
+    .source-row.custom-row { border-left: 3px solid rgba(88,166,255,.4); }
+
+    /* Toggle switch */
+    .toggle-wrap { display: flex; align-items: center; justify-content: center; }
+    .toggle {
+      position: relative;
+      width: 34px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      left: 3px; top: 3px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: transform .2s, background .2s;
+    }
+    .toggle input:checked + .toggle-slider { background: rgba(63,185,80,.35); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(14px); background: var(--green); }
+
+    /* Source name + url */
+    .src-info {}
+    .src-name-edit {
+      font-size: .84rem;
+      font-weight: 500;
+      color: var(--white);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 2px 5px;
+      width: 100%;
+      font-family: 'IBM Plex Sans', sans-serif;
+      cursor: text;
+      outline: none;
+    }
+    .src-name-edit:hover { border-color: var(--border); }
+    .src-name-edit:focus { border-color: var(--gold); background: var(--panel); }
+    .src-url { font-size: .68rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+
+    /* Inline selects */
+    .src-select {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .78rem;
+      padding: 3px 5px;
+      cursor: pointer;
+      outline: none;
+      width: 100%;
+    }
+    .src-select:hover { border-color: var(--border); background: var(--panel); }
+    .src-select:focus { border-color: var(--gold); background: var(--panel); }
+
+    /* Lang badge */
+    .lang-tag { font-size: .65rem; padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+
+    /* Action buttons */
+    .src-actions { display: flex; gap: .3rem; justify-content: flex-end; flex-shrink: 0; }
+    .btn-icon {
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      padding: 4px 7px;
+      cursor: pointer;
+      font-size: .8rem;
+      color: var(--muted);
+      transition: border-color .12s, color .12s;
+    }
+    .btn-icon:hover { border-color: var(--border); color: var(--text); }
+    .btn-icon.danger:hover { border-color: rgba(192,57,43,.5); color: #f08080; }
+    .btn-icon.save-btn { color: var(--green); }
+    .btn-icon.save-btn:hover { border-color: rgba(63,185,80,.4); }
+
+    /* Type tag */
+    .type-tag {
+      font-size: .62rem;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .type-preset { background: rgba(232,168,56,.12); color: var(--gold); }
+    .type-custom { background: rgba(88,166,255,.12); color: var(--blue); }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1.2rem;
+      font-size: .82rem;
+      color: var(--text);
+      box-shadow: 0 4px 24px rgba(0,0,0,.5);
+      transform: translateY(8px);
+      opacity: 0;
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      z-index: 999;
+      max-width: 320px;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 720px) {
+      .add-grid { grid-template-columns: 1fr 1fr; }
+      .source-row { grid-template-columns: 30px 1fr auto; }
+      .source-row .src-select,
+      .source-row .src-url { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-flag"></div>
+    <div class="logo-text">
+      <h1>Tin tức Chính phủ</h1>
+      <span>Quản lý nguồn tin</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span id="ai-pill" class="pill-off">⬤ …</span>
+    <a href="/" class="btn-back">← Về trang chủ</a>
+  </div>
+</header>
+
+<div class="page-wrap">
+<div class="mgr-wrap">
+
+  <!-- Page title -->
+  <div class="page-header">
+    <div>
+      <h2>📡 Quản lý nguồn tin</h2>
+      <p>Thêm, chỉnh sửa, bật/tắt và xóa các nguồn tin tức.</p>
+    </div>
+    <button class="btn-back" onclick="refreshAll()" style="border-color:var(--red);color:var(--red)">
+      ↻ Cập nhật cache
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="mgr-stats" id="mgr-stats">
+    <div class="stat-pill stat-all">📡 Tổng: <strong id="s-total">—</strong></div>
+    <div class="stat-pill stat-vi">🇻🇳 Tiếng Việt: <strong id="s-vi">—</strong></div>
+    <div class="stat-pill stat-en">🇬🇧 English: <strong id="s-en">—</strong></div>
+    <div class="stat-pill" style="background:rgba(63,185,80,.1);color:var(--green);border-color:rgba(63,185,80,.25)">✅ Đang bật: <strong id="s-on">—</strong></div>
+    <div class="stat-pill" style="background:rgba(118,131,144,.1);color:var(--muted);border-color:rgba(118,131,144,.25)">⏸ Tắt: <strong id="s-off">—</strong></div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <input type="text" id="filter-q" placeholder="🔍  Tìm kiếm tên hoặc URL…" oninput="renderTables()"/>
+    <select id="filter-lang" onchange="renderTables()">
+      <option value="">Tất cả ngôn ngữ</option>
+      <option value="vi">🇻🇳 Tiếng Việt</option>
+      <option value="en">🇬🇧 English</option>
+    </select>
+    <select id="filter-status" onchange="renderTables()">
+      <option value="">Tất cả trạng thái</option>
+      <option value="on">✅ Đang bật</option>
+      <option value="off">⏸ Đang tắt</option>
+    </select>
+  </div>
+
+  <!-- ADD SOURCE -->
+  <div class="add-box">
+    <h3>➕ Thêm nguồn mới</h3>
+    <div class="add-grid">
+      <div>
+        <label>URL website *</label>
+        <input type="text" id="new-url" placeholder="https://moh.gov.vn"/>
+      </div>
+      <div>
+        <label>Tên hiển thị</label>
+        <input type="text" id="new-name" placeholder="Bộ Y tế"/>
+      </div>
+      <div>
+        <label>Danh mục</label>
+        <select id="new-cat">
+          <option value="Tin tức">Tin tức</option>
+          <option value="Chính phủ">Chính phủ</option>
+          <option value="Y tế">Y tế</option>
+          <option value="Kinh tế">Kinh tế</option>
+          <option value="Pháp luật">Pháp luật</option>
+          <option value="Giáo dục">Giáo dục</option>
+          <option value="Quốc tế">Quốc tế</option>
+          <option value="Xã hội">Xã hội</option>
+          <option value="Quốc phòng">Quốc phòng</option>
+          <option value="Business">Business</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      <div>
+        <label>Ngôn ngữ</label>
+        <select id="new-lang">
+          <option value="vi">🇻🇳 Tiếng Việt</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+      </div>
+      <button class="btn-add" id="btn-add" onclick="addSource()">＋ Thêm</button>
+    </div>
+    <div id="add-status"></div>
+  </div>
+
+  <!-- PRESET SOURCES -->
+  <div class="section-header">
+    <h3>📌 Nguồn có sẵn (Preset)</h3>
+    <span id="preset-count">—</span>
+  </div>
+  <div class="source-table" id="preset-table"></div>
+
+  <!-- CUSTOM SOURCES -->
+  <div class="section-header" style="margin-top:2rem">
+    <h3>🌐 Nguồn tùy chỉnh (Custom)</h3>
+    <span id="custom-count">—</span>
+  </div>
+  <div class="source-table" id="custom-table">
+    <div style="font-size:.82rem;color:var(--muted);padding:1rem .5rem">Chưa có nguồn tùy chỉnh. Thêm ở trên.</div>
+  </div>
+
+</div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+let presetSources = [], customSources = [];
+
+// ── Boot ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkStatus();
+  await loadSources();
+});
+
+async function checkStatus() {
+  try {
+    const d = await apiGet('/api/status');
+    updateAIPill(d.ai_status);
+  } catch { updateAIPill('offline'); }
+}
+
+function updateAIPill(s) {
+  const pill = document.getElementById('ai-pill');
+  const map = { enabled:['🤖 AI bật','pill-on'], disabled:['⚠️ AI tắt','pill-off'], invalid_key:['❌ Key sai','pill-err'], offline:['❌ Offline','pill-err'] };
+  const [t,c] = map[s] || ['⬤ …','pill-off'];
+  pill.textContent=t; pill.className=c;
+}
+
+// ── Load sources ───────────────────────────────────────────────────
+async function loadSources() {
+  try {
+    const d     = await apiGet('/api/sources/all');
+    presetSources  = d.preset  || [];
+    customSources  = d.custom  || [];
+    updateStats();
+    renderTables();
+  } catch(e) {
+    toast('❌ Lỗi tải nguồn: ' + e.message, 'err');
+  }
+}
+
+function updateStats() {
+  const all    = [...presetSources, ...customSources];
+  const vi     = all.filter(s => s.lang === 'vi').length;
+  const en     = all.filter(s => s.lang === 'en').length;
+  const on     = all.filter(s => s.enabled !== false).length;
+  const off    = all.filter(s => s.enabled === false).length;
+  document.getElementById('s-total').textContent = all.length;
+  document.getElementById('s-vi').textContent    = vi;
+  document.getElementById('s-en').textContent    = en;
+  document.getElementById('s-on').textContent    = on;
+  document.getElementById('s-off').textContent   = off;
+}
+
+// ── Render tables ──────────────────────────────────────────────────
+function renderTables() {
+  const q      = document.getElementById('filter-q').value.toLowerCase();
+  const lang   = document.getElementById('filter-lang').value;
+  const status = document.getElementById('filter-status').value;
+
+  function matches(s) {
+    const qOk   = !q || s.name.toLowerCase().includes(q) || s.url.toLowerCase().includes(q);
+    const lOk   = !lang || s.lang === lang;
+    const sOk   = !status || (status === 'on' ? s.enabled !== false : s.enabled === false);
+    return qOk && lOk && sOk;
+  }
+
+  const pFiltered = presetSources.filter(matches);
+  const cFiltered = customSources.filter(matches);
+
+  document.getElementById('preset-count').textContent = `${pFiltered.length} / ${presetSources.length} nguồn`;
+  document.getElementById('custom-count').textContent = `${cFiltered.length} / ${customSources.length} nguồn`;
+
+  const pTable = document.getElementById('preset-table');
+  const cTable = document.getElementById('custom-table');
+
+  pTable.innerHTML = pFiltered.length
+    ? pFiltered.map(s => rowHTML(s, 'preset')).join('')
+    : '<div style="font-size:.82rem;color:var(--muted);padding:1rem .5rem">Không có kết quả.</div>';
+
+  cTable.innerHTML = cFiltered.length
+    ? cFiltered.map(s => rowHTML(s, 'custom')).join('')
+    : '<div style="font-size:.82rem;color:var(--muted);padding:1rem .5rem">Chưa có nguồn tùy chỉnh. Thêm ở trên.</div>';
+}
+
+function rowHTML(s, type) {
+  const isEn     = s.lang === 'en';
+  const enabled  = s.enabled !== false;
+  const rowId    = `row-${esc(s.id || s.url.replace(/[^a-z0-9]/gi,'_'))}`;
+  const cats = ['Tin tức','Chính phủ','Y tế','Kinh tế','Pháp luật','Giáo dục','Quốc tế','Xã hội','Quốc phòng','Chính trị','Business','Politics','General','World','General'];
+  const catOpts  = cats.map(c => `<option value="${c}" ${s.category===c?'selected':''}>${c}</option>`).join('');
+
+  return `
+  <div class="source-row ${type}-row ${enabled?'':'disabled'}" id="${rowId}">
+    <!-- Toggle -->
+    <div class="toggle-wrap">
+      <label class="toggle">
+        <input type="checkbox" ${enabled?'checked':''} onchange="toggleSource('${esc(s.id||'')}','${esc(s.url)}','${type}',this)"/>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <!-- Name + URL -->
+    <div class="src-info">
+      <input class="src-name-edit" type="text" value="${esc(s.name)}"
+        onblur="saveField('${esc(s.id||'')}','${esc(s.url)}','${type}','name',this.value)"
+        title="Nhấn để chỉnh sửa tên"/>
+      <div class="src-url" title="${esc(s.url)}">${esc(s.url)}</div>
+    </div>
+
+    <!-- Category -->
+    <select class="src-select" onchange="saveField('${esc(s.id||'')}','${esc(s.url)}','${type}','category',this.value)">
+      ${catOpts}
+    </select>
+
+    <!-- Language -->
+    <select class="src-select" onchange="saveField('${esc(s.id||'')}','${esc(s.url)}','${type}','lang',this.value)">
+      <option value="vi" ${!isEn?'selected':''}>🇻🇳 Tiếng Việt</option>
+      <option value="en" ${isEn?'selected':''}>🇬🇧 English</option>
+    </select>
+
+    <!-- Type -->
+    <span class="type-tag ${type==='preset'?'type-preset':'type-custom'}">${type==='preset'?'Preset':'Custom'}</span>
+
+    <!-- Actions -->
+    <div class="src-actions">
+      <a href="${esc(s.url)}" target="_blank" class="btn-icon" title="Mở website">🔗</a>
+      ${type==='custom' ? `<button class="btn-icon danger" onclick="deleteSource('${esc(s.url)}')" title="Xóa">🗑</button>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Actions ────────────────────────────────────────────────────────
+async function toggleSource(id, url, type, checkbox) {
+  const enabled = checkbox.checked;
+  try {
+    if (type === 'preset') {
+      await apiPost('/api/sources/preset/toggle', { id });
+      presetSources = presetSources.map(s => s.id === id ? {...s, enabled} : s);
+    } else {
+      await apiPost('/api/sources/custom/update', { url, enabled });
+      customSources = customSources.map(s => s.url === url ? {...s, enabled} : s);
+    }
+    updateStats();
+    const row = document.getElementById(`row-${(id||url).replace(/[^a-z0-9]/gi,'_')}`);
+    if (row) row.classList.toggle('disabled', !enabled);
+    toast(enabled ? '✅ Đã bật nguồn' : '⏸ Đã tắt nguồn');
+  } catch(e) {
+    checkbox.checked = !enabled; // revert
+    toast('❌ Lỗi: ' + e.message, 'err');
+  }
+}
+
+async function saveField(id, url, type, field, value) {
+  try {
+    if (type === 'preset') {
+      await apiPost('/api/sources/preset/update', { id, [field]: value });
+      presetSources = presetSources.map(s => s.id === id ? {...s, [field]: value} : s);
+    } else {
+      await apiPost('/api/sources/custom/update', { url, [field]: value });
+      customSources = customSources.map(s => s.url === url ? {...s, [field]: value} : s);
+    }
+    updateStats();
+    toast(`💾 Đã lưu ${field === 'name' ? 'tên' : field === 'lang' ? 'ngôn ngữ' : 'danh mục'}`);
+  } catch(e) {
+    toast('❌ Lỗi lưu: ' + e.message, 'err');
+  }
+}
+
+async function addSource() {
+  const url  = document.getElementById('new-url').value.trim().replace(/[\u200B-\u200D\uFEFF]/g,'');
+  const name = document.getElementById('new-name').value.trim();
+  const cat  = document.getElementById('new-cat').value;
+  const lang = document.getElementById('new-lang').value;
+
+  if (!url) { setAddStatus('⚠️ Vui lòng nhập URL', '#e8a838'); return; }
+
+  const btn = document.getElementById('btn-add');
+  btn.disabled = true; btn.textContent = '…';
+  setAddStatus('🔄 Đang thêm…', 'var(--muted)');
+
+  try {
+    const data = await apiPost('/api/sources/custom/add', { url, name: name || undefined, category: cat, lang });
+    if (data.error) { setAddStatus('❌ ' + data.error, '#f08080'); return; }
+
+    // Add to local state
+    customSources.push({ ...data.source, id: `custom_${customSources.length}`, type: 'custom' });
+    updateStats();
+    renderTables();
+
+    // Clear form
+    document.getElementById('new-url').value  = '';
+    document.getElementById('new-name').value = '';
+    setAddStatus('✅ Đã thêm nguồn: ' + esc(data.source.name), 'var(--green)');
+    toast('✅ Thêm nguồn thành công!');
+  } catch(e) {
+    setAddStatus('❌ ' + e.message, '#f08080');
+  } finally {
+    btn.disabled = false; btn.textContent = '＋ Thêm';
+  }
+}
+
+async function deleteSource(url) {
+  if (!confirm(`Xóa nguồn:\n${url}?`)) return;
+  try {
+    await apiPost('/api/sources/custom/delete', { url });
+    customSources = customSources.filter(s => s.url !== url);
+    updateStats();
+    renderTables();
+    toast('🗑 Đã xóa nguồn');
+  } catch(e) {
+    toast('❌ Lỗi xóa: ' + e.message, 'err');
+  }
+}
+
+async function refreshAll() {
+  toast('🔄 Đang cập nhật cache…');
+  try {
+    await apiPost('/api/refresh');
+    toast('✅ Cache đã cập nhật!');
+  } catch(e) {
+    toast('❌ Lỗi: ' + e.message, 'err');
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+function setAddStatus(msg, color) {
+  const el = document.getElementById('add-status');
+  el.innerHTML = msg; el.style.color = color;
+}
+
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.innerHTML = msg;
+  el.style.borderColor = type === 'err' ? 'rgba(192,57,43,.5)' : 'var(--border)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+async function apiGet(path) {
+  const res = await fetch(path, { signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+async function apiPost(path, body = {}) {
+  const res = await fetch(path, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body), signal: AbortSignal.timeout(30000),
+  });
+  if (!res.ok) { let m=`HTTP ${res.status}`; try{const d=await res.json();m=d.error||m;}catch{} throw new Error(m); }
+  return res.json();
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>

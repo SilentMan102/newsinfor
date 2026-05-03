@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Tin tức Chính phủ Việt Nam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet"/>
+  <!-- Local stylesheet -->
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+<!-- ── Server Warning Banner ─────────────────────────────────────── -->
+<div id="server-banner">
+  ⚠️ Server chưa chạy. Mở Command Prompt →
+  <code>python app.py</code> → mở
+  <code>http://localhost:5000</code>
+</div>
+
+<!-- ── Header ────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-flag"></div>
+    <div class="logo-text">
+      <h1>Tin tức Chính phủ</h1>
+      <span>Tổng hợp nguồn tin chính thống</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+      <button class="lang-btn active-all" id="lang-all" onclick="setLang('all', this)">
+        🌐 <span class="label">Tất cả</span>
+      </button>
+      <div class="lang-divider"></div>
+      <button class="lang-btn" id="lang-vi" onclick="setLang('vi', this)">
+        🇻🇳 <span class="label">Tiếng Việt</span>
+      </button>
+      <div class="lang-divider"></div>
+      <button class="lang-btn" id="lang-en" onclick="setLang('en', this)">
+        🇬🇧 <span class="label">English</span>
+      </button>
+    </div>
+    <span id="ai-pill" class="pill-off">⬤ …</span>
+    <a href="/sources" style="background:var(--card);border:1px solid var(--border);color:var(--text);font-family:IBM Plex Sans,sans-serif;font-size:.78rem;padding:6px 14px;border-radius:6px;text-decoration:none;white-space:nowrap">⚙️ Nguồn tin</a>
+    <button id="refresh-btn" onclick="forceRefresh()">↻ Cập nhật</button>
+  </div>
+</header>
+
+<!-- ── Page Layout ───────────────────────────────────────────────── -->
+<div class="page-wrap">
+
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Danh mục</div>
+      <div id="cat-list">
+        <button class="cat-btn active" data-cat="all" onclick="selectCategory('all', this)">
+          🗂 Tất cả <span class="count" id="count-all">—</span>
+        </button>
+      </div>
+    </div>
+    <hr class="divider"/>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Nguồn tùy chỉnh</div>
+      <div id="custom-src-list">
+        <span style="font-size:.72rem;color:var(--muted);padding:.2rem .75rem;display:block">Chưa có nguồn</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <div class="main-header">
+      <h2 class="main-title" id="page-title">Tất cả tin tức</h2>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.2rem">
+        <span id="item-count"></span>
+        <span id="updated-at"></span>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div id="stats-bar">
+      <div class="stat-pill stat-all">🌐 Tổng: <strong id="stat-total">—</strong></div>
+      <div class="stat-pill stat-vi">🇻🇳 Tiếng Việt: <strong id="stat-vi">—</strong></div>
+      <div class="stat-pill stat-en">🇬🇧 English: <strong id="stat-en">—</strong></div>
+    </div>
+
+    <!-- Universal Extractor -->
+    <div class="extract-box">
+      <h3>🔍 Trích xuất tin từ bất kỳ website nào</h3>
+      <div class="extract-row">
+        <input type="text" id="extract-url"
+          placeholder="https://moh.gov.vn  hoặc  https://e.vnexpress.net  …"/>
+        <select id="extract-cat">
+          <option value="Tin tức">Tin tức / News</option>
+          <option value="Chính phủ">Chính phủ / Government</option>
+          <option value="Y tế">Y tế / Health</option>
+          <option value="Kinh tế">Kinh tế / Economy</option>
+          <option value="Pháp luật">Pháp luật / Law</option>
+          <option value="Giáo dục">Giáo dục / Education</option>
+          <option value="Quốc tế">Quốc tế / World</option>
+          <option value="Xã hội">Xã hội / Society</option>
+          <option value="Quốc phòng">Quốc phòng / Defence</option>
+          <option value="Business">Business</option>
+          <option value="Politics">Politics</option>
+          <option value="General">General</option>
+        </select>
+        <select id="extract-lang">
+          <option value="">Tự động nhận diện</option>
+          <option value="vi">🇻🇳 Tiếng Việt</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+        <button class="btn-extract" id="btn-extract" onclick="doExtract()">Trích xuất</button>
+        <button class="btn-save"    id="btn-save"    onclick="doSave()">＋ Lưu nguồn</button>
+      </div>
+      <div id="extract-status"></div>
+    </div>
+
+    <!-- Search -->
+    <div id="search-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="search" type="text"
+        placeholder="Tìm kiếm tiêu đề / Search headlines…"
+        oninput="onSearch()"/>
+    </div>
+
+    <!-- News List -->
+    <div id="news-list"></div>
+
+    <!-- Load More -->
+    <div id="load-more-wrap" style="display:none">
+      <button id="load-more" onclick="loadMore()">Xem thêm / Load more</button>
+    </div>
+  </main>
+
+</div>
+
+<!-- ── JavaScript ─────────────────────────────────────────────────── -->
+<script src="/static/app.js"></script>
+
+</body>
+</html>
