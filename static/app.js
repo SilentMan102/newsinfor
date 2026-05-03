@@ -394,3 +394,23 @@ function catIcon(cat) {
   };
   return map[cat] || '📰';
 }
+
+// ── Mobile bottom nav ──────────────────────────────────────────────
+function mobileNav(tab, btn) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (tab === 'home') {
+    setLang('all', document.getElementById('lang-all'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (tab === 'vi') {
+    setLang('vi', document.getElementById('lang-vi'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (tab === 'en') {
+    setLang('en', document.getElementById('lang-en'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (tab === 'search') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => document.getElementById('search').focus(), 300);
+  }
+}

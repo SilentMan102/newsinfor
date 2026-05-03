@@ -478,10 +478,124 @@ main { padding: 2rem 2.5rem; max-width: 900px; }
 ::-webkit-scrollbar-track { background: var(--dark); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-/* ── Responsive ────────────────────────────────────── */
-@media (max-width: 720px) {
-  .page-wrap               { grid-template-columns: 1fr; }
-  aside                    { display: none; }
-  main                     { padding: 1.2rem; }
-  .lang-btn span.label     { display: none; }
+/* ══════════════════════════════════════════════════════
+   MOBILE — iPhone & small screens (≤ 640px)
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Layout */
+  .page-wrap  { grid-template-columns: 1fr; }
+  aside       { display: none; }
+  main        { padding: .9rem .9rem 5rem; }
+
+  /* Header */
+  header {
+    height: auto;
+    padding: .6rem 1rem;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .logo-text h1   { font-size: .92rem; }
+  .logo-text span { display: none; }
+  .header-right   { gap: .5rem; width: 100%; justify-content: space-between; }
+
+  /* Language toggle — full width on mobile */
+  .lang-toggle  { flex: 1; }
+  .lang-btn     { flex: 1; justify-content: center; padding: 6px 4px; font-size: .72rem; }
+  .lang-btn span.label { display: none; }
+  #ai-pill      { display: none; }
+  #refresh-btn  { padding: 6px 10px; font-size: .74rem; }
+
+  /* Stats bar — scroll horizontally */
+  #stats-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: .5rem;
+    padding-bottom: .3rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #stats-bar::-webkit-scrollbar { display: none; }
+  .stat-pill { white-space: nowrap; font-size: .7rem; flex-shrink: 0; }
+
+  /* Extractor box */
+  .extract-box  { padding: .9rem; }
+  .extract-row  { flex-direction: column; gap: .5rem; }
+  .extract-row input,
+  .extract-row select,
+  .btn-extract,
+  .btn-save     { width: 100%; font-size: .84rem; padding: .6rem .75rem; }
+
+  /* Search */
+  #search       { font-size: .84rem; padding: .6rem .75rem .6rem 2.2rem; }
+
+  /* News cards */
+  .news-card    { padding: .75rem .85rem; gap: .65rem; }
+  .card-icon    { font-size: 1rem; }
+  .card-title   { font-size: .84rem; line-height: 1.5; }
+  .card-meta    { gap: .4rem; margin-top: .3rem; }
+  .badge        { font-size: .6rem; padding: 1px 5px; }
+  .meta-source  { font-size: .66rem; }
+
+  /* Main header */
+  .main-header  { flex-direction: column; align-items: flex-start; gap: .3rem; margin-bottom: 1rem; }
+  .main-title   { font-size: 1.25rem; }
+  #item-count,
+  #updated-at   { font-size: .68rem; }
+
+  /* Bottom nav bar (mobile only) */
+  #mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    height: 56px;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  .mobile-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: .62rem;
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color .15s;
+    padding: 0;
+  }
+  .mobile-nav-btn .nav-icon { font-size: 1.1rem; line-height: 1; }
+  .mobile-nav-btn.active    { color: var(--red); }
+  .mobile-nav-btn:hover     { color: var(--text); }
+
+  /* Load more */
+  #load-more { width: 100%; padding: .7rem; font-size: .84rem; }
+
+  /* Extract status text wraps nicely */
+  #extract-status { font-size: .74rem; }
+
+  /* Section label */
+  .section-label { font-size: .68rem; }
+}
+
+/* Tablet (641px – 900px) */
+@media (min-width: 641px) and (max-width: 900px) {
+  .page-wrap  { grid-template-columns: 190px 1fr; }
+  main        { padding: 1.5rem; }
+  .lang-btn span.label { display: none; }
+  #mobile-nav { display: none; }
+}
+
+/* Desktop — hide mobile nav */
+@media (min-width: 901px) {
+  #mobile-nav { display: none; }
 }

@@ -141,6 +141,26 @@
 
 </div>
 
+
+<!-- ── Mobile bottom nav (iPhone) ──────────────────── -->
+<nav id="mobile-nav">
+  <button class="mobile-nav-btn active" id="nav-home" onclick="mobileNav('home',this)">
+    <span class="nav-icon">🏠</span><span>Trang chủ</span>
+  </button>
+  <button class="mobile-nav-btn" id="nav-vi" onclick="mobileNav('vi',this)">
+    <span class="nav-icon">🇻🇳</span><span>Tiếng Việt</span>
+  </button>
+  <button class="mobile-nav-btn" id="nav-en" onclick="mobileNav('en',this)">
+    <span class="nav-icon">🇬🇧</span><span>English</span>
+  </button>
+  <button class="mobile-nav-btn" id="nav-search" onclick="mobileNav('search',this)">
+    <span class="nav-icon">🔍</span><span>Tìm kiếm</span>
+  </button>
+  <a class="mobile-nav-btn" href="/sources">
+    <span class="nav-icon">⚙️</span><span>Nguồn tin</span>
+  </a>
+</nav>
+
 <!-- ── JavaScript ─────────────────────────────────────────────────── -->
 <script src="/static/app.js"></script>
 
